@@ -510,7 +510,7 @@ class WXBot:
             str_msg = msg
         return str_msg_all.replace(u'\u2005', ''), str_msg.replace(u'\u2005', ''), infos
 
-    def extract_msg_content(self, msg_type_id, msg):
+    def extract_msg_content(self, msg_type_id, msg,user):
         """
         content_type_id:
             0 -> Text
@@ -588,7 +588,7 @@ class WXBot:
             msg_content['data'] = self.get_msg_img_url(msg_id)
             msg_content['img'] = self.session.get(msg_content['data']).content.encode('hex')
             if self.DEBUG:
-                image = self.get_msg_img(msg_id)
+                image = self.get_msg_img(msg_id,user)
                 print '    %s[Image] %s' % (msg_prefix, image)
         elif mtype == 34:
             msg_content['type'] = 4
@@ -750,7 +750,7 @@ class WXBot:
 
             if self.DEBUG and msg_type_id != 0:
                 print u'[MSG] %s:' % user['name']
-            content = self.extract_msg_content(msg_type_id, msg)
+            content = self.extract_msg_content(msg_type_id, msg, user)
             message = {'msg_type_id': msg_type_id,
                        'msg_id': msg['MsgId'],
                        'content': content,
@@ -1443,7 +1443,10 @@ class WXBot:
     def get_msg_img_url(self, msgid):
         return self.base_uri + '/webwxgetmsgimg?MsgID=%s&skey=%s' % (msgid, self.skey)
 
-    def get_msg_img(self, msgid):
+    def imagepath(self,username,uid):
+        return username+uid+"/"
+
+    def get_msg_img(self, msgid, user):
         """
         获取图片消息，下载图片到本地
         :param msgid: 消息id
@@ -1452,10 +1455,25 @@ class WXBot:
         url = self.base_uri + '/webwxgetmsgimg?MsgID=%s&skey=%s' % (msgid, self.skey)
         r = self.session.get(url)
         data = r.content
+
+        path = self.imagepath(user['name'],user['id'])
+        print path
+
+        dic = os.path.join(self.temp_pwd,path)
+
+        print "图片存储到了:"
+        print dic
+
+        if os.path.exists(dic) == False:
+            os.makedirs(dic)
         fn = 'img_' + msgid + '.jpg'
-        with open(os.path.join(self.temp_pwd,fn), 'wb') as f:
+        print "图片名字："
+        print fn
+        with open(os.path.join(dic,fn), 'wb') as f:
             f.write(data)
         return fn
+
+
 
     def get_voice_url(self, msgid):
         return self.base_uri + '/webwxgetvoice?msgid=%s&skey=%s' % (msgid, self.skey)
