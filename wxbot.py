@@ -1457,17 +1457,16 @@ class WXBot:
         data = r.content
 
         path = self.imagepath(user['name'],user['id'])
-        print path
 
         dic = os.path.join(self.temp_pwd,path)
 
-        print "图片存储到了:"
+        print ">>>>>>>>>图片存储到了:"
         print dic
 
         if os.path.exists(dic) == False:
             os.makedirs(dic)
         fn = 'img_' + msgid + '.jpg'
-        print "图片名字："
+        print ">>>>>>>>>图片名字："
         print fn
         with open(os.path.join(dic,fn), 'wb') as f:
             f.write(data)
